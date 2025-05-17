@@ -3,13 +3,18 @@ require('dotenv').config();
 
 const uri = "mongodb+srv://yassinezwine25:oUy3uJY6yLwlExOP@cluster0.bwnaong.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
-// Create a MongoClient
+// Create a MongoClient with updated options
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
     strict: true,
     deprecationErrors: true,
-  }
+  },
+  // Add these options to fix SSL connection issues
+  minPoolSize: 1,
+  tlsInsecure: true,  // Only use in development environment
+  ssl: true,
+  directConnection: false,
 });
 
 let db;
@@ -26,7 +31,8 @@ const connectDB = async () => {
     return db;
   } catch (err) {
     console.error("MongoDB connection error:", err);
-    process.exit(1);
+    // Don't exit process on connection error - allow retry
+    throw err;
   }
 };
 
